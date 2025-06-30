@@ -27,6 +27,7 @@ class SseConnectionManager(ConnectionManager[tuple[Any, Any]]):
         headers: dict[str, str] | None = None,
         timeout: float = 5,
         sse_read_timeout: float = 60 * 5,
+        **kwargs: Any,
     ):
         """Initialize a new SSE connection manager.
 
@@ -36,7 +37,7 @@ class SseConnectionManager(ConnectionManager[tuple[Any, Any]]):
             timeout: Timeout for HTTP operations in seconds
             sse_read_timeout: Timeout for SSE read operations in seconds
         """
-        super().__init__()
+        super().__init__(auth=kwargs.get("auth"))
         self.url = url
         self.headers = headers or {}
         self.timeout = timeout
@@ -58,6 +59,7 @@ class SseConnectionManager(ConnectionManager[tuple[Any, Any]]):
             headers=self.headers,
             timeout=self.timeout,
             sse_read_timeout=self.sse_read_timeout,
+            auth=self.auth
         )
 
         # Enter the context manager

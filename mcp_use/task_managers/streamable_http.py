@@ -28,6 +28,7 @@ class StreamableHttpConnectionManager(ConnectionManager[tuple[Any, Any]]):
         headers: dict[str, str] | None = None,
         timeout: float = 5,
         read_timeout: float = 60 * 5,
+        **kwargs: Any,
     ):
         """Initialize a new streamable HTTP connection manager.
 
@@ -37,7 +38,7 @@ class StreamableHttpConnectionManager(ConnectionManager[tuple[Any, Any]]):
             timeout: Timeout for HTTP operations in seconds
             read_timeout: Timeout for HTTP read operations in seconds
         """
-        super().__init__()
+        super().__init__(auth=kwargs.get("auth"))
         self.url = url
         self.headers = headers or {}
         self.timeout = timedelta(seconds=timeout)
@@ -59,6 +60,7 @@ class StreamableHttpConnectionManager(ConnectionManager[tuple[Any, Any]]):
             headers=self.headers,
             timeout=self.timeout,
             sse_read_timeout=self.read_timeout,
+            auth=self.auth
         )
 
         # Enter the context manager. Ignoring the session id callback

@@ -27,6 +27,7 @@ class HttpConnector(BaseConnector):
         headers: dict[str, str] | None = None,
         timeout: float = 5,
         sse_read_timeout: float = 60 * 5,
+        **kwargs: Any,
     ):
         """Initialize a new HTTP connector.
 
@@ -45,6 +46,7 @@ class HttpConnector(BaseConnector):
             self.headers["Authorization"] = f"Bearer {auth_token}"
         self.timeout = timeout
         self.sse_read_timeout = sse_read_timeout
+        self.auth = kwargs.get("auth", None)
 
     async def _setup_client(self, connection_manager: ConnectionManager) -> None:
         """Set up the client session with the provided connection manager."""
@@ -69,7 +71,7 @@ class HttpConnector(BaseConnector):
             # First, try the new streamable HTTP transport
             logger.debug(f"Attempting streamable HTTP connection to: {self.base_url}")
             connection_manager = StreamableHttpConnectionManager(
-                self.base_url, self.headers, self.timeout, self.sse_read_timeout
+                self.base_url, self.headers, self.timeout, self.sse_read_timeout, auth=self.auth
             )
 
             # Test if this is a streamable HTTP server by attempting initialization
@@ -123,7 +125,7 @@ class HttpConnector(BaseConnector):
                     # Fall back to the old SSE transport
                     logger.debug(f"Attempting SSE fallback connection to: {self.base_url}")
                     connection_manager = SseConnectionManager(
-                        self.base_url, self.headers, self.timeout, self.sse_read_timeout
+                        self.base_url, self.headers, self.timeout, self.sse_read_timeout, auth=self.auth
                     )
 
                     read_stream, write_stream = await connection_manager.start()

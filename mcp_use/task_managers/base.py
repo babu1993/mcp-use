@@ -6,8 +6,9 @@ managers used in MCP connectors.
 """
 
 import asyncio
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethodø
 from typing import Generic, TypeVar
+import httpx
 
 from ..logging import logger
 
@@ -22,13 +23,15 @@ class ConnectionManager(Generic[T], ABC):
     used with MCP connectors.
     """
 
-    def __init__(self):
+    def __init__(self, auth: httpx.Auth=None):
         """Initialize a new connection manager."""
         self._ready_event = asyncio.Event()
         self._done_event = asyncio.Event()
         self._exception: Exception | None = None
         self._connection: T | None = None
         self._task: asyncio.Task | None = None
+        self.auth: httpx.Auth | None = auth
+
 
     @abstractmethod
     async def _establish_connection(self) -> T:
